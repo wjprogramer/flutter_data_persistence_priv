@@ -27,6 +27,18 @@ class Categories extends Table {
 // this annotation tells moor to prepare a database class that uses both of the
 // tables we just defined. We'll see how to use that database class in a moment.
 @UseMoor(tables: [Todos, Categories])
-class MyDatabase {
+class MyDatabase extends _$MyDatabase {
+  MyDatabase(QueryExecutor e) : super(e);
 
+  @override
+  int get schemaVersion => 1;
+
+  // loads all todo entries
+  Future<List<Todo>> get allTodoEntries => select(todos).get();
+
+  // watches all todo entries in a given category. The stream will automatically
+  // emit new items whenever the underlying data changes.
+  Stream<List<Todo>> watchEntriesInCategory(Category c) {
+    return (select(todos)..where((t) => t.category.equals(c.id))).watch();
+  }
 }
