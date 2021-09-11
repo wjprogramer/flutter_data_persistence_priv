@@ -428,13 +428,16 @@ class $CategoriesTable extends Categories
 }
 
 class User extends DataClass implements Insertable<User> {
+  final String id;
   final String email;
   final String name;
-  User({required this.email, required this.name});
+  User({required this.id, required this.email, required this.name});
   factory User.fromData(Map<String, dynamic> data, GeneratedDatabase db,
       {String? prefix}) {
     final effectivePrefix = prefix ?? '';
     return User(
+      id: const StringType()
+          .mapFromDatabaseResponse(data['${effectivePrefix}id'])!,
       email: const StringType()
           .mapFromDatabaseResponse(data['${effectivePrefix}email'])!,
       name: const StringType()
@@ -444,6 +447,7 @@ class User extends DataClass implements Insertable<User> {
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
+    map['id'] = Variable<String>(id);
     map['email'] = Variable<String>(email);
     map['name'] = Variable<String>(name);
     return map;
@@ -451,6 +455,7 @@ class User extends DataClass implements Insertable<User> {
 
   UsersCompanion toCompanion(bool nullToAbsent) {
     return UsersCompanion(
+      id: Value(id),
       email: Value(email),
       name: Value(name),
     );
@@ -460,6 +465,7 @@ class User extends DataClass implements Insertable<User> {
       {ValueSerializer? serializer}) {
     serializer ??= moorRuntimeOptions.defaultSerializer;
     return User(
+      id: serializer.fromJson<String>(json['id']),
       email: serializer.fromJson<String>(json['email']),
       name: serializer.fromJson<String>(json['name']),
     );
@@ -468,18 +474,21 @@ class User extends DataClass implements Insertable<User> {
   Map<String, dynamic> toJson({ValueSerializer? serializer}) {
     serializer ??= moorRuntimeOptions.defaultSerializer;
     return <String, dynamic>{
+      'id': serializer.toJson<String>(id),
       'email': serializer.toJson<String>(email),
       'name': serializer.toJson<String>(name),
     };
   }
 
-  User copyWith({String? email, String? name}) => User(
+  User copyWith({String? id, String? email, String? name}) => User(
+        id: id ?? this.id,
         email: email ?? this.email,
         name: name ?? this.name,
       );
   @override
   String toString() {
     return (StringBuffer('User(')
+          ..write('id: $id, ')
           ..write('email: $email, ')
           ..write('name: $name')
           ..write(')'))
@@ -487,37 +496,48 @@ class User extends DataClass implements Insertable<User> {
   }
 
   @override
-  int get hashCode => $mrjf($mrjc(email.hashCode, name.hashCode));
+  int get hashCode =>
+      $mrjf($mrjc(id.hashCode, $mrjc(email.hashCode, name.hashCode)));
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
-      (other is User && other.email == this.email && other.name == this.name);
+      (other is User &&
+          other.id == this.id &&
+          other.email == this.email &&
+          other.name == this.name);
 }
 
 class UsersCompanion extends UpdateCompanion<User> {
+  final Value<String> id;
   final Value<String> email;
   final Value<String> name;
   const UsersCompanion({
+    this.id = const Value.absent(),
     this.email = const Value.absent(),
     this.name = const Value.absent(),
   });
   UsersCompanion.insert({
+    this.id = const Value.absent(),
     required String email,
     required String name,
   })  : email = Value(email),
         name = Value(name);
   static Insertable<User> custom({
+    Expression<String>? id,
     Expression<String>? email,
     Expression<String>? name,
   }) {
     return RawValuesInsertable({
+      if (id != null) 'id': id,
       if (email != null) 'email': email,
       if (name != null) 'name': name,
     });
   }
 
-  UsersCompanion copyWith({Value<String>? email, Value<String>? name}) {
+  UsersCompanion copyWith(
+      {Value<String>? id, Value<String>? email, Value<String>? name}) {
     return UsersCompanion(
+      id: id ?? this.id,
       email: email ?? this.email,
       name: name ?? this.name,
     );
@@ -526,6 +546,9 @@ class UsersCompanion extends UpdateCompanion<User> {
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<String>(id.value);
+    }
     if (email.present) {
       map['email'] = Variable<String>(email.value);
     }
@@ -538,6 +561,7 @@ class UsersCompanion extends UpdateCompanion<User> {
   @override
   String toString() {
     return (StringBuffer('UsersCompanion(')
+          ..write('id: $id, ')
           ..write('email: $email, ')
           ..write('name: $name')
           ..write(')'))
@@ -549,6 +573,12 @@ class $UsersTable extends Users with TableInfo<$UsersTable, User> {
   final GeneratedDatabase _db;
   final String? _alias;
   $UsersTable(this._db, [this._alias]);
+  final VerificationMeta _idMeta = const VerificationMeta('id');
+  late final GeneratedColumn<String?> id = GeneratedColumn<String?>(
+      'id', aliasedName, false,
+      typeName: 'TEXT',
+      requiredDuringInsert: false,
+      clientDefault: () => _uuid.v4());
   final VerificationMeta _emailMeta = const VerificationMeta('email');
   late final GeneratedColumn<String?> email = GeneratedColumn<String?>(
       'email', aliasedName, false,
@@ -558,7 +588,7 @@ class $UsersTable extends Users with TableInfo<$UsersTable, User> {
       'name', aliasedName, false,
       typeName: 'TEXT', requiredDuringInsert: true);
   @override
-  List<GeneratedColumn> get $columns => [email, name];
+  List<GeneratedColumn> get $columns => [id, email, name];
   @override
   String get aliasedName => _alias ?? 'users';
   @override
@@ -568,6 +598,9 @@ class $UsersTable extends Users with TableInfo<$UsersTable, User> {
       {bool isInserting = false}) {
     final context = VerificationContext();
     final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    }
     if (data.containsKey('email')) {
       context.handle(
           _emailMeta, email.isAcceptableOrUnknown(data['email']!, _emailMeta));
