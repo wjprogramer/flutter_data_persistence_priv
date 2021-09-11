@@ -1,9 +1,12 @@
 import 'package:moor_flutter/moor_flutter.dart';
 import 'package:moor/moor.dart';
+import 'package:uuid/uuid.dart';
 
 // assuming that your file is called filename.dart. This will give an error at first,
 // but it's needed for moor to know about the generated code
 part 'database.g.dart';
+
+final _uuid = Uuid();
 
 // this will generate a table called "todos" for us. The rows of that table will
 // be represented by a class called "Todo".
@@ -19,17 +22,39 @@ class Todos extends Table {
 // in the table name.
 @DataClassName("Category")
 class Categories extends Table {
-
   IntColumn get id => integer().autoIncrement()();
   TextColumn get description => text()();
 }
 
+class EnabledCategories extends Table {
+  String get tableName => 'categories';
+
+  IntColumn get parentCategory => integer().named('parent')();
+}
+
 class Users extends Table {
+  // - withDefault: use constant
+  // - clientDefault: non constant
+  TextColumn get id => text().clientDefault(() => _uuid.v4())();
   TextColumn get email => text()();
   TextColumn get name => text()();
 
   @override
   Set<Column> get primaryKey => {email};
+}
+
+class GroupMemberships extends Table {
+  // - 使用 customConstraint 會覆蓋掉「所有其他」的 constraint，例如預設的 not-null 必須重新設定
+  // - moor 沒有提供一些 constraint，例如 REFERENCES，所以必須用 customConstraint
+  // - You can also add table-wide constraints by overriding the customConstraints getter in your table class.
+  IntColumn get group => integer().customConstraint('NOT NULL REFERENCES groups (id)')();
+  IntColumn get user => integer().customConstraint('NOT NULL REFERENCES users (id)')();
+
+  // @override
+  // List<String> get customConstraints => [];
+
+  @override
+  Set<Column> get primaryKey => {group, user};
 }
 
 class Words extends Table {
@@ -38,6 +63,11 @@ class Words extends Table {
 
   @override
   Set<Column> get primaryKey => {word};
+}
+
+class Preferences extends Table {
+  TextColumn get name => text()();
+  BoolColumn get enabled => boolean().withDefault(const Constant(false))();
 }
 
 // this annotation tells moor to prepare a database class that uses both of the
