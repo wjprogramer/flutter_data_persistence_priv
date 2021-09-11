@@ -427,12 +427,354 @@ class $CategoriesTable extends Categories
   }
 }
 
+class User extends DataClass implements Insertable<User> {
+  final String email;
+  final String name;
+  User({required this.email, required this.name});
+  factory User.fromData(Map<String, dynamic> data, GeneratedDatabase db,
+      {String? prefix}) {
+    final effectivePrefix = prefix ?? '';
+    return User(
+      email: const StringType()
+          .mapFromDatabaseResponse(data['${effectivePrefix}email'])!,
+      name: const StringType()
+          .mapFromDatabaseResponse(data['${effectivePrefix}name'])!,
+    );
+  }
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['email'] = Variable<String>(email);
+    map['name'] = Variable<String>(name);
+    return map;
+  }
+
+  UsersCompanion toCompanion(bool nullToAbsent) {
+    return UsersCompanion(
+      email: Value(email),
+      name: Value(name),
+    );
+  }
+
+  factory User.fromJson(Map<String, dynamic> json,
+      {ValueSerializer? serializer}) {
+    serializer ??= moorRuntimeOptions.defaultSerializer;
+    return User(
+      email: serializer.fromJson<String>(json['email']),
+      name: serializer.fromJson<String>(json['name']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= moorRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'email': serializer.toJson<String>(email),
+      'name': serializer.toJson<String>(name),
+    };
+  }
+
+  User copyWith({String? email, String? name}) => User(
+        email: email ?? this.email,
+        name: name ?? this.name,
+      );
+  @override
+  String toString() {
+    return (StringBuffer('User(')
+          ..write('email: $email, ')
+          ..write('name: $name')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => $mrjf($mrjc(email.hashCode, name.hashCode));
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is User && other.email == this.email && other.name == this.name);
+}
+
+class UsersCompanion extends UpdateCompanion<User> {
+  final Value<String> email;
+  final Value<String> name;
+  const UsersCompanion({
+    this.email = const Value.absent(),
+    this.name = const Value.absent(),
+  });
+  UsersCompanion.insert({
+    required String email,
+    required String name,
+  })  : email = Value(email),
+        name = Value(name);
+  static Insertable<User> custom({
+    Expression<String>? email,
+    Expression<String>? name,
+  }) {
+    return RawValuesInsertable({
+      if (email != null) 'email': email,
+      if (name != null) 'name': name,
+    });
+  }
+
+  UsersCompanion copyWith({Value<String>? email, Value<String>? name}) {
+    return UsersCompanion(
+      email: email ?? this.email,
+      name: name ?? this.name,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (email.present) {
+      map['email'] = Variable<String>(email.value);
+    }
+    if (name.present) {
+      map['name'] = Variable<String>(name.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('UsersCompanion(')
+          ..write('email: $email, ')
+          ..write('name: $name')
+          ..write(')'))
+        .toString();
+  }
+}
+
+class $UsersTable extends Users with TableInfo<$UsersTable, User> {
+  final GeneratedDatabase _db;
+  final String? _alias;
+  $UsersTable(this._db, [this._alias]);
+  final VerificationMeta _emailMeta = const VerificationMeta('email');
+  late final GeneratedColumn<String?> email = GeneratedColumn<String?>(
+      'email', aliasedName, false,
+      typeName: 'TEXT', requiredDuringInsert: true);
+  final VerificationMeta _nameMeta = const VerificationMeta('name');
+  late final GeneratedColumn<String?> name = GeneratedColumn<String?>(
+      'name', aliasedName, false,
+      typeName: 'TEXT', requiredDuringInsert: true);
+  @override
+  List<GeneratedColumn> get $columns => [email, name];
+  @override
+  String get aliasedName => _alias ?? 'users';
+  @override
+  String get actualTableName => 'users';
+  @override
+  VerificationContext validateIntegrity(Insertable<User> instance,
+      {bool isInserting = false}) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('email')) {
+      context.handle(
+          _emailMeta, email.isAcceptableOrUnknown(data['email']!, _emailMeta));
+    } else if (isInserting) {
+      context.missing(_emailMeta);
+    }
+    if (data.containsKey('name')) {
+      context.handle(
+          _nameMeta, name.isAcceptableOrUnknown(data['name']!, _nameMeta));
+    } else if (isInserting) {
+      context.missing(_nameMeta);
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {email};
+  @override
+  User map(Map<String, dynamic> data, {String? tablePrefix}) {
+    return User.fromData(data, _db,
+        prefix: tablePrefix != null ? '$tablePrefix.' : null);
+  }
+
+  @override
+  $UsersTable createAlias(String alias) {
+    return $UsersTable(_db, alias);
+  }
+}
+
+class Word extends DataClass implements Insertable<Word> {
+  final String word;
+  final int usages;
+  Word({required this.word, required this.usages});
+  factory Word.fromData(Map<String, dynamic> data, GeneratedDatabase db,
+      {String? prefix}) {
+    final effectivePrefix = prefix ?? '';
+    return Word(
+      word: const StringType()
+          .mapFromDatabaseResponse(data['${effectivePrefix}word'])!,
+      usages: const IntType()
+          .mapFromDatabaseResponse(data['${effectivePrefix}usages'])!,
+    );
+  }
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['word'] = Variable<String>(word);
+    map['usages'] = Variable<int>(usages);
+    return map;
+  }
+
+  WordsCompanion toCompanion(bool nullToAbsent) {
+    return WordsCompanion(
+      word: Value(word),
+      usages: Value(usages),
+    );
+  }
+
+  factory Word.fromJson(Map<String, dynamic> json,
+      {ValueSerializer? serializer}) {
+    serializer ??= moorRuntimeOptions.defaultSerializer;
+    return Word(
+      word: serializer.fromJson<String>(json['word']),
+      usages: serializer.fromJson<int>(json['usages']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= moorRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'word': serializer.toJson<String>(word),
+      'usages': serializer.toJson<int>(usages),
+    };
+  }
+
+  Word copyWith({String? word, int? usages}) => Word(
+        word: word ?? this.word,
+        usages: usages ?? this.usages,
+      );
+  @override
+  String toString() {
+    return (StringBuffer('Word(')
+          ..write('word: $word, ')
+          ..write('usages: $usages')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => $mrjf($mrjc(word.hashCode, usages.hashCode));
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is Word && other.word == this.word && other.usages == this.usages);
+}
+
+class WordsCompanion extends UpdateCompanion<Word> {
+  final Value<String> word;
+  final Value<int> usages;
+  const WordsCompanion({
+    this.word = const Value.absent(),
+    this.usages = const Value.absent(),
+  });
+  WordsCompanion.insert({
+    required String word,
+    this.usages = const Value.absent(),
+  }) : word = Value(word);
+  static Insertable<Word> custom({
+    Expression<String>? word,
+    Expression<int>? usages,
+  }) {
+    return RawValuesInsertable({
+      if (word != null) 'word': word,
+      if (usages != null) 'usages': usages,
+    });
+  }
+
+  WordsCompanion copyWith({Value<String>? word, Value<int>? usages}) {
+    return WordsCompanion(
+      word: word ?? this.word,
+      usages: usages ?? this.usages,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (word.present) {
+      map['word'] = Variable<String>(word.value);
+    }
+    if (usages.present) {
+      map['usages'] = Variable<int>(usages.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('WordsCompanion(')
+          ..write('word: $word, ')
+          ..write('usages: $usages')
+          ..write(')'))
+        .toString();
+  }
+}
+
+class $WordsTable extends Words with TableInfo<$WordsTable, Word> {
+  final GeneratedDatabase _db;
+  final String? _alias;
+  $WordsTable(this._db, [this._alias]);
+  final VerificationMeta _wordMeta = const VerificationMeta('word');
+  late final GeneratedColumn<String?> word = GeneratedColumn<String?>(
+      'word', aliasedName, false,
+      typeName: 'TEXT', requiredDuringInsert: true);
+  final VerificationMeta _usagesMeta = const VerificationMeta('usages');
+  late final GeneratedColumn<int> usages = GeneratedColumn<int>(
+      'usages', aliasedName, false,
+      typeName: 'INTEGER',
+      requiredDuringInsert: false,
+      defaultValue: const Constant<int>(1));
+  @override
+  List<GeneratedColumn> get $columns => [word, usages];
+  @override
+  String get aliasedName => _alias ?? 'words';
+  @override
+  String get actualTableName => 'words';
+  @override
+  VerificationContext validateIntegrity(Insertable<Word> instance,
+      {bool isInserting = false}) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('word')) {
+      context.handle(
+          _wordMeta, word.isAcceptableOrUnknown(data['word']!, _wordMeta));
+    } else if (isInserting) {
+      context.missing(_wordMeta);
+    }
+    if (data.containsKey('usages')) {
+      context.handle(_usagesMeta,
+          usages.isAcceptableOrUnknown(data['usages']!, _usagesMeta));
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {word};
+  @override
+  Word map(Map<String, dynamic> data, {String? tablePrefix}) {
+    return Word.fromData(data, _db,
+        prefix: tablePrefix != null ? '$tablePrefix.' : null);
+  }
+
+  @override
+  $WordsTable createAlias(String alias) {
+    return $WordsTable(_db, alias);
+  }
+}
+
 abstract class _$MyDatabase extends GeneratedDatabase {
   _$MyDatabase(QueryExecutor e) : super(SqlTypeSystem.defaultInstance, e);
   late final $TodosTable todos = $TodosTable(this);
   late final $CategoriesTable categories = $CategoriesTable(this);
+  late final $UsersTable users = $UsersTable(this);
+  late final $WordsTable words = $WordsTable(this);
   @override
   Iterable<TableInfo> get allTables => allSchemaEntities.whereType<TableInfo>();
   @override
-  List<DatabaseSchemaEntity> get allSchemaEntities => [todos, categories];
+  List<DatabaseSchemaEntity> get allSchemaEntities =>
+      [todos, categories, users, words];
 }

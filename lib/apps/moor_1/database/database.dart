@@ -24,9 +24,25 @@ class Categories extends Table {
   TextColumn get description => text()();
 }
 
+class Users extends Table {
+  TextColumn get email => text()();
+  TextColumn get name => text()();
+
+  @override
+  Set<Column> get primaryKey => {email};
+}
+
+class Words extends Table {
+  TextColumn get word => text()();
+  IntColumn get usages => integer().withDefault(const Constant<int>(1))();
+
+  @override
+  Set<Column> get primaryKey => {word};
+}
+
 // this annotation tells moor to prepare a database class that uses both of the
 // tables we just defined. We'll see how to use that database class in a moment.
-@UseMoor(tables: [Todos, Categories])
+@UseMoor(tables: [Todos, Categories, Users, Words])
 class MyDatabase extends _$MyDatabase {
   MyDatabase(QueryExecutor e) : super(e);
 
@@ -139,5 +155,22 @@ class MyDatabase extends _$MyDatabase {
     });
   }
 
-  
+  Future<void> createOrUpdateUser(User user) {
+    return into(users).insertOnConflictUpdate(user);
+  }
+
+  Future<void> trackWord(String word) {
+    return into(words).insert(
+      WordsCompanion.insert(word: word),
+      onConflict: DoUpdate((old) => WordsCompanion.custom(usages: old.usages + Constant(1))),
+    );
+  }
+
+  Future<Todo> insertReturningTodo() {
+    return into(todos).insertReturning(TodosCompanion.insert(
+      title: 'A todo entry',
+      content: 'A description',
+    ));
+  }
+
 }
