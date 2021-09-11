@@ -10,9 +10,21 @@ dependencies:
     sdk: flutter
   cupertino_icons: ^1.0.3
 
+  # MIT
+  moor: ^4.5.0
+  moor_flutter: ^4.0.0
+  sqlite3_flutter_libs: ^0.5.0
+
+  # BSD
+  path_provider: ^2.0.3
+  path: ^1.8.0
+
 dev_dependencies:
   flutter_test:
     sdk: flutter
+  # MIT
+  moor_generator: ^4.5.1
+  build_runner: ^2.1.2
 
 flutter:
   uses-material-design: true
