@@ -1,1 +1,1 @@
-/// Moor Example: Existing databases
+/// Moor Example: Existing database
